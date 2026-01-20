@@ -45,6 +45,25 @@ function ComparisonChart({ seriesData, seriesInfo, pmType, title }) {
 
   const tickInterval = Math.ceil(allData.length / 10);
 
+  // Dynamische Y-as zodat lijnen dicht bij de data blijven
+  const values = [];
+  Object.values(seriesData).forEach((points) => {
+    points.forEach((p) => {
+      const val = Number(p[pmType]);
+      if (Number.isFinite(val)) {
+        values.push(val);
+      }
+    });
+  });
+
+  const hasValues = values.length > 0;
+  const minVal = hasValues ? Math.min(...values) : 0;
+  const maxVal = hasValues ? Math.max(...values) : 1;
+  const range = Math.max(maxVal - minVal, 0.001);
+  const padding = Math.max(range * 0.1, 0.2);
+  const yMin = Math.max(0, minVal - padding);
+  const yMax = maxVal + padding;
+
   return (
     <div className="chart-container">
       <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>{title}</h3>
@@ -57,6 +76,7 @@ function ComparisonChart({ seriesData, seriesInfo, pmType, title }) {
             label={{ value: 'Meetpunt', position: 'insideBottom', offset: -5 }}
           />
           <YAxis 
+            domain={[yMin, yMax]}
             label={{ value: 'Concentratie (µg/m³)', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip 
